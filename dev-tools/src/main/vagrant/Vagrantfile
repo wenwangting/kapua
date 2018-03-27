@@ -218,6 +218,12 @@ Vagrant.configure("2") do |config|
       sudo sed -i 's/KAPUA_VERSION/'"$KAPUA_VERSION"'/g' update-kapua-war.sh
 
       sudo chown -R vagrant /usr/local/tomcat/apache-tomcat-${TOMCAT_VERSION}
+
+      ################################
+      ### Camel data message setup ###
+      ################################
+      sudo mkdir -p /usr/local/camel/data_message
+      sudo chown -R vagrant:vagrant /usr/local/camel
     SHELL
 
     config.vm.provision "shell", env: env_vars, run: "always", inline: <<-SHELL

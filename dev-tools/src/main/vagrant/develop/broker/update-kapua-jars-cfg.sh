@@ -29,3 +29,6 @@ ln -s /kapua/assembly/broker/src/main/resources/conf/broker/camel.xml /usr/local
 ln -s /kapua/assembly/broker/src/main/resources/conf/broker/camel-routes.xml /usr/local/activemq/apache-activemq-ACTIVEMQ_VERSION/conf/camel-routes.xml
 ln -s /kapua/assembly/broker/src/main/resources/conf/broker/locator.xml /usr/local/activemq/apache-activemq-ACTIVEMQ_VERSION/conf/locator.xml
 ln -s /kapua/assembly/broker/src/main/resources/conf/broker/logback.xml /usr/local/activemq/apache-activemq-ACTIVEMQ_VERSION/conf/logback.xml
+echo 'creating link to camel data message uber jar'
+rm /usr/local/camel/data_message/kapua-camel-data-message-uber.jar
+for name in $(ls /kapua/camel/data-message/target/kapua-camel-data-message-*-uber.jar); do ln -s  $name /usr/local/camel/data_message/kapua-camel-data-message-uber.jar; done;

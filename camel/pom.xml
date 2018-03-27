@@ -25,9 +25,8 @@
     <artifactId>kapua-camel</artifactId>
 
     <modules>
-        <module>test</module>
         <module>context-initializer</module>
-        <module>default-routing</module>
+        <module>data-message</module>
     </modules>
 
 </project>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Copyright (c) 2011, 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2011, 2018 Eurotech and/or its affiliates and others
 
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
@@ -26,11 +26,11 @@
          http://www.springframework.org/schema/util/spring-util-3.2.xsd">
 
     <!-- Configure the ActiveMQ broker connection -->
-    <bean id="kapuaConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
-        <property name="brokerURL" value="tcp://192.168.33.10:61616"/>
-        <property name="userName" value="kapua-sys" />
+    <bean id="kapuaConnectionFactory" class="org.apache.qpid.jms.JmsConnectionFactory">
+        <property name="remoteURI" value="amqp://192.168.33.10:5672"/>
+        <property name="username" value="kapua-sys" />
         <property name="password" value="kapua-password" />
-        <property name="clientID" value="camel_client_id_TO_REPLACE_WITH_UNIQUE_ID" />
+        <property name="clientID" value="camel_client_data_message" />
     </bean>
 
     <bean id="cachingConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
@@ -44,9 +44,9 @@
         <property name="cacheLevelName" value="CACHE_CONSUMER"/>
     </bean>
 
-    <bean id="activemq" class="org.apache.activemq.camel.component.ActiveMQComponent">
-        <property name="configuration" ref="jmsConfig"/>
-    </bean>
+    <bean id="amqp" class="org.apache.camel.component.amqp.AMQPComponent">
+        <property name="configuration" ref="jmsConfig" />
+    </bean>  
     <!--  create connection pooling!!! -->
 
     <!-- session filers (to bind Kapua and Shiro thread context) -->
@@ -55,12 +55,9 @@
 
     <!-- Converter -->
     <bean id="kapuaDataConverter" class="org.eclipse.kapua.broker.core.converter.KapuaDataConverter"/>
-    <bean id="kapuaLifeCycleConverter" class="org.eclipse.kapua.broker.core.converter.KapuaLifeCycleConverter"/>
 
     <!-- Consumer -->
     <!-- ASSISTANTS -->
-    <bean id="deviceMessageListener" class="org.eclipse.kapua.broker.core.listener.DeviceMessageListener">
-    </bean>
     <bean id="dataStorageMessageProcessor" class="org.eclipse.kapua.broker.core.listener.DataStorageMessageProcessor">
     </bean>
     <!-- ERROR -->
@@ -77,7 +74,7 @@
         <!-- exception/error handler -->
         <!--
         by default the errorHandler forward the message to a dead letter queue but in that way we lose the failure end point
-        deadLetterUri="activemq:queue:processedMessageWithError"
+        deadLetterUri="amqp:queue:processedMessageWithError"
         if we forward the message directly to an end point with the exchange in the signature
         deadLetterUri="bean:errorMessagePojo?method=processMessage"
         we have these properties evaluated (in the exchange field)
@@ -93,7 +90,7 @@
         </errorHandler>
         <errorHandler id="messageErrorHandler" redeliveryPolicyRef="kapuaErrorRedeliveryPolicy"
                       type="DeadLetterChannel"
-                      deadLetterUri="activemq:queue:notProcessableMessage"
+                      deadLetterUri="amqp:queue:notProcessableMessage"
                       useOriginalMessage="true">
         </errorHandler>
         <redeliveryPolicyProfile id="kapuaRedeliveryPolicy" maximumRedeliveries="0" redeliveryDelay="0" retryAttemptedLogLevel="WARN" logRetryAttempted="true" />
@@ -114,7 +111,7 @@
         transacted=false
         -->
         <route errorHandlerRef="mainRouteMessageErrorHandler" id="mainKapuaRoute">
-            <from uri="activemq:queue:Consumer.eurotech:camel_client_id_TO_REPLACE_WITH_UNIQUE_ID:EXACTLY_ONCE.VirtualTopic.>?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=20&amp;maxConcurrentConsumers=50"/>
+            <from uri="amqp:queue:Consumer.eurotech:camel_client_id_TO_REPLACE_WITH_UNIQUE_ID:EXACTLY_ONCE.VirtualTopic.>?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=20&amp;maxConcurrentConsumers=50"/>
             <!--  handling timeout and communication exceptions in a retry queue -->
             <onException>
                 <exception>org.eclipse.kapua.service.datastore.internal.mediator.DatastoreCommunicationException</exception>
@@ -122,7 +119,7 @@
                 <handled>
                     <constant>true</constant>
                 </handled>
-                <to uri="activemq:queue:storeCommunicationException"/>
+                <to uri="amqp:queue:storeCommunicationException"/>
             </onException>
             <!-- handling configuration error -->
             <onException>
@@ -131,7 +128,7 @@
                 <handled>
                     <constant>true</constant>
                 </handled>
-                <to uri="activemq:queue:storeConfigurationException"/>
+                <to uri="amqp:queue:storeConfigurationException"/>
             </onException>
             <onException>
                 <exception>org.eclipse.kapua.service.datastore.internal.mediator.DatastoreException</exception>
@@ -139,7 +136,7 @@
                 <handled>
                     <constant>true</constant>
                 </handled>
-                <to uri="activemq:queue:storeGenericException"/>
+                <to uri="amqp:queue:storeGenericException"/>
             </onException>
             <onException>
                 <exception>org.eclipse.kapua.KapuaException</exception>
@@ -147,56 +144,22 @@
                 <handled>
                     <constant>true</constant>
                 </handled>
-                <to uri="activemq:queue:notProcessableMessage"/>
+                <to uri="amqp:queue:notProcessableMessage"/>
             </onException>
             <pipeline>
-                <bean ref="kapuaCamelFilter" method="bindSession"/>
                 <choice id="choice">
                     <when id="systemMessageFilter">
-                        <simple>${header.originalTopic} regex '^\$EDC\..*'</simple>
-                        <choice id="choice">
-                            <when id="birthLifeCycleMessageFilter">
-                                <simple>${header.originalTopic} regex '^\$EDC\.(.*\.){2}MQTT\.BIRTH'</simple>
-                                <bean ref="kapuaLifeCycleConverter" method="convertToBirth"/>
-                                <to uri="bean:deviceMessageListener?method=processBirthMessage"/>
-                            </when>
-                            <when id="disconnectLifeCycleMessageFilter">
-                                <simple>${header.originalTopic} regex '^\$EDC\.(.*\.){2}MQTT\.DC'</simple>
-                                <bean ref="kapuaLifeCycleConverter" method="convertToDisconnect"/>
-                                <to uri="bean:deviceMessageListener?method=processDisconnectMessage"/>
-                            </when>
-                            <when id="appsLifeCycleMessageFilter">
-                                <simple>${header.originalTopic} regex '^\$EDC\.(.*\.){2}MQTT\.APPS'</simple>
-                                <bean ref="kapuaLifeCycleConverter" method="convertToApps"/>
-                                <to uri="bean:deviceMessageListener?method=processAppsMessage"/>
-                            </when>
-                            <when id="missingLifeCycleMessageFilter">
-                                <simple>${header.originalTopic} regex '^\$EDC\.(.*\.){2}MQTT\.LWT'</simple>
-                                <bean ref="kapuaLifeCycleConverter" method="convertToMissing"/>
-                                <to uri="bean:deviceMessageListener?method=processMissingMessage"/>
-                            </when>
-                            <when id="notifyLifeCycleMessageFilter">
-                                <simple>${header.originalTopic} regex '^\$EDC\.(.*\.){2}MQTT\.NOTIFY'</simple>
-                                <bean ref="kapuaLifeCycleConverter" method="convertToNotify"/>
-                                <to uri="bean:deviceMessageListener?method=processNotifyMessage"/>
-                            </when>
-                            <otherwise id="unmatchedLifeCycleMessageFilter">
-                                <bean ref="kapuaLifeCycleConverter" method="convertToUnmatched"/>
-                                <to uri="bean:deviceMessageListener?method=processUnmatchedMessage"/>
-                            </otherwise>
-                        </choice>
-                    </when>
-                    <!-- otherwise data messages -->
-                    <otherwise>
+                        <simple>${header.originalTopic} regex '(^(?!\$EDC\.).*)'</simple>
+                        <bean ref="kapuaCamelFilter" method="bindSession"/>
                         <bean ref="kapuaDataConverter" method="convertToData"/>
                         <to uri="bean:dataStorageMessageProcessor?method=processMessage"/>
-                    </otherwise>
+                        <bean ref="kapuaCamelFilter" method="unbindSession"/>
+                    </when>
                 </choice>
-                <bean ref="kapuaCamelFilter" method="unbindSession"/>
             </pipeline>
         </route>
         <route errorHandlerRef="messageErrorHandler" id="dataMessageCommunicationErrorRoute">
-            <from uri="activemq:queue:storeCommunicationException?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=2&amp;maxConcurrentConsumers=5"/>
+            <from uri="amqp:queue:storeCommunicationException?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=2&amp;maxConcurrentConsumers=5"/>
             <pipeline>
                 <delay>
                     <constant>1000</constant>
@@ -208,7 +171,7 @@
             </pipeline>
         </route>
         <route errorHandlerRef="messageErrorHandler" id="dataMessageConfigurationErrorRoute">
-            <from uri="activemq:queue:storeConfigurationException?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=2&amp;maxConcurrentConsumers=5"/>
+            <from uri="amqp:queue:storeConfigurationException?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=2&amp;maxConcurrentConsumers=5"/>
             <pipeline>
                 <delay>
                     <constant>1000</constant>
@@ -220,7 +183,7 @@
             </pipeline>
         </route>
         <route errorHandlerRef="messageErrorHandler" id="dataMessageGenericErrorRoute">
-            <from uri="activemq:queue:storeGenericException?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=2&amp;maxConcurrentConsumers=5"/>
+            <from uri="amqp:queue:storeGenericException?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=2&amp;maxConcurrentConsumers=5"/>
             <pipeline>
                 <delay>
                     <constant>1000</constant>
@@ -232,7 +195,7 @@
             </pipeline>
         </route>
         <route id="dataMessageNotProcessableErrorRoute" >
-            <from uri="activemq:queue:notProcessableMessage?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=2&amp;maxConcurrentConsumers=5"/>
+            <from uri="amqp:queue:notProcessableMessage?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=2&amp;maxConcurrentConsumers=5"/>
             <pipeline>
                 <bean ref="kapuaCamelFilter" method="bindSession"/>
                 <to uri="bean:dataStorageMessageProcessor?method=notProcessableMessage"/>

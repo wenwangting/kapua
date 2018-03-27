@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    Copyright (c) 2016, 2017 Eurotech and/or its affiliates and others
+    Copyright (c) 2016, 2018 Eurotech and/or its affiliates and others
 
     All rights reserved. This program and the accompanying materials
     are made available under the terms of the Eclipse Public License v1.0
@@ -32,6 +32,7 @@
         <artemis.version>2.2.0</artemis.version>
         <assertj.version>3.2.0</assertj.version>
         <camel.version>2.16.3</camel.version>
+        <vertx.version>3.5.1</vertx.version>
         <commons-beanutils.version>1.9.2</commons-beanutils.version>
         <commons-cli.version>1.4</commons-cli.version>
         <commons-codec.version>1.9</commons-codec.version>
@@ -991,6 +992,17 @@
                 <groupId>org.apache.camel</groupId>
                 <artifactId>camel-jms</artifactId>
                 <version>${camel.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.camel</groupId>
+                <artifactId>camel-amqp</artifactId>
+                <version>${camel.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-core</artifactId>
+                <version>${vertx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>

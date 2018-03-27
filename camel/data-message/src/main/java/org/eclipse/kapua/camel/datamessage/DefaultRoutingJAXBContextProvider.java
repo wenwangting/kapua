@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kapua.camel;
+package org.eclipse.kapua.camel.datamessage;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;

@@ -9,17 +9,19 @@
  * Contributors:
  *     Eurotech - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kapua.camel;
+package org.eclipse.kapua.camel.datamessage;
 
+import org.eclipse.kapua.camel.DefaultRoutingJAXBContextProvider;
 import org.eclipse.kapua.camel.context.CamelContextInitializer;
+import org.eclipse.kapua.commons.util.xml.XmlUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CamelMain {
+public class CamelDataMessageMainTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(CamelMain.class);
+    private static final Logger logger = LoggerFactory.getLogger(CamelDataMessageMainTest.class);
 
-    private CamelMain() {
+    private CamelDataMessageMainTest() {
     }
 
     public static void main(String argv[]) {
@@ -29,7 +31,8 @@ public class CamelMain {
             System.setProperty("org.apache.activemq.SERIALIZABLE_PACKAGES", "*");
 
             logger.info("Starting camel context... starting");
-            CamelContextInitializer.initializeCamelContext("../" + DefaultRouting.initAndGetConfigurationFile());
+            XmlUtil.setContextProvider(new DefaultRoutingJAXBContextProvider());
+            new CamelContextInitializer("../default-routing/src/main/resources/configuration/camel.xml");
             logger.info("Starting camel context... staring DONE");
             Thread.currentThread().join();
         } catch (Exception e) {

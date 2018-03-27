@@ -17,3 +17,8 @@ cd /usr/local/activemq/apache-activemq-ACTIVEMQ_VERSION
 ./update-kapua-jars-cfg.sh
 export ACTIVEMQ_OPTS="${ACTIVEMQ_OPTS} -Dorg.apache.activemq.SERIALIZABLE_PACKAGES=*"
 bin/activemq start xbean:conf/activemq.xml
+cd /usr/local/camel/data_message/
+echo 'starting data message consumer'
+nohup java -jar kapua-camel-data-message-uber.jar > data-message-log.txt 2> data-message-errors.txt < /dev/null & PID=$!
+echo $PID > data-message-pid.txt
+cd /usr/local/activemq/apache-activemq-ACTIVEMQ_VERSION
