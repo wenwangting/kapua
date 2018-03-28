@@ -9,26 +9,25 @@
  * Contributors:
  *     Eurotech - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kapua.service.datastore.internal.mediator;
+package org.eclipse.kapua.service.datastore;
 
 /**
- * Invalid configuration exception.<br>
- * This exception is raised if some configuration parameter is not valid
- * 
- * @since 1.0
+ * Invalid channel exception.<br>
+ * This exception is raised if the channel doesn't match validations
  *
+ * @since 1.0
  */
-public class ConfigurationException extends DatastoreException {
+public class InvalidChannelException extends DatastoreException {
 
     private static final long serialVersionUID = 5211237236391747299L;
 
     /**
      * Construct the exception with the provided message
-     * 
+     *
      * @param message
      */
-    public ConfigurationException(String message) {
-        super(DatastoreErrorCodes.CONFIGURATION_ERROR, message);
+    public InvalidChannelException(String message) {
+        super(DatastoreErrorCodes.INVALID_CHANNEL, message);
     }
 
     /**
@@ -37,8 +36,8 @@ public class ConfigurationException extends DatastoreException {
      * @param message
      * @param t
      */
-    public ConfigurationException(String message, Throwable t) {
-        super(DatastoreErrorCodes.CONFIGURATION_ERROR, t, message);
+    public InvalidChannelException(String message, Throwable t) {
+        super(DatastoreErrorCodes.INVALID_CHANNEL, t, message);
     }
 
 }

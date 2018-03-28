@@ -19,8 +19,8 @@ import org.eclipse.kapua.broker.core.message.CamelKapuaMessage;
 import org.eclipse.kapua.commons.metric.MetricServiceFactory;
 import org.eclipse.kapua.commons.metric.MetricsService;
 import org.eclipse.kapua.locator.KapuaLocator;
+import org.eclipse.kapua.service.datastore.DatastoreCommunicationException;
 import org.eclipse.kapua.service.datastore.MessageStoreService;
-import org.eclipse.kapua.service.datastore.internal.mediator.DatastoreCommunicationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.eclipse.kapua.KapuaIllegalArgumentException;
 import org.eclipse.kapua.model.id.KapuaId;
+import org.eclipse.kapua.service.datastore.ConfigurationException;
 import org.eclipse.kapua.service.datastore.client.ClientException;
 import org.eclipse.kapua.service.datastore.internal.schema.Metadata;
 import org.eclipse.kapua.service.datastore.model.DatastoreMessage;

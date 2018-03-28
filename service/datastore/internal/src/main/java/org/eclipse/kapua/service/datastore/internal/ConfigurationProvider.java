@@ -12,7 +12,7 @@
 package org.eclipse.kapua.service.datastore.internal;
 
 import org.eclipse.kapua.model.id.KapuaId;
-import org.eclipse.kapua.service.datastore.internal.mediator.ConfigurationException;
+import org.eclipse.kapua.service.datastore.ConfigurationException;
 import org.eclipse.kapua.service.datastore.internal.mediator.MessageInfo;
 import org.eclipse.kapua.service.datastore.internal.mediator.MessageStoreConfiguration;
 

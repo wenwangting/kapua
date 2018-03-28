@@ -32,6 +32,8 @@ import java.util.regex.Pattern;
 
 import org.eclipse.kapua.commons.util.KapuaDateUtils;
 import org.eclipse.kapua.model.id.KapuaId;
+import org.eclipse.kapua.service.datastore.DatastoreErrorCodes;
+import org.eclipse.kapua.service.datastore.DatastoreException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

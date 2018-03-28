@@ -20,6 +20,7 @@ import org.eclipse.kapua.message.KapuaPayload;
 import org.eclipse.kapua.model.id.KapuaId;
 import org.eclipse.kapua.service.datastore.ChannelInfoRegistryService;
 import org.eclipse.kapua.service.datastore.ClientInfoRegistryService;
+import org.eclipse.kapua.service.datastore.ConfigurationException;
 import org.eclipse.kapua.service.datastore.MetricInfoRegistryService;
 import org.eclipse.kapua.service.datastore.client.ClientException;
 import org.eclipse.kapua.service.datastore.client.QueryMappingException;

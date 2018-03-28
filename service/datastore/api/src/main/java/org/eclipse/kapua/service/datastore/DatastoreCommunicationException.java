@@ -9,7 +9,7 @@
  * Contributors:
  *     Eurotech - initial API and implementation
  *******************************************************************************/
-package org.eclipse.kapua.service.datastore.internal.mediator;
+package org.eclipse.kapua.service.datastore;
 
 /**
  * Invalid configuration exception.<br>

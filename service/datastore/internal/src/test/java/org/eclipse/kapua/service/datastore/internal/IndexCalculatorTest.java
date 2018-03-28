@@ -22,7 +22,7 @@ import java.util.TimeZone;
 import org.eclipse.kapua.KapuaException;
 import org.eclipse.kapua.commons.model.id.KapuaEid;
 import org.eclipse.kapua.commons.util.KapuaDateUtils;
-import org.eclipse.kapua.service.datastore.internal.mediator.DatastoreException;
+import org.eclipse.kapua.service.datastore.DatastoreException;
 import org.eclipse.kapua.service.datastore.internal.mediator.DatastoreUtils;
 import org.eclipse.kapua.test.KapuaTest;
 import org.junit.Test;
