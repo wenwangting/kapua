@@ -11,10 +11,11 @@
  *******************************************************************************/
 package org.eclipse.kapua.broker.core.route;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.model.ProcessorDefinition;
-
-public interface Route {
+/**
+ * Route definition
+ *
+ */
+public interface Route extends Brick {
 
     /**
      * Get the route uri from
@@ -24,23 +25,5 @@ public interface Route {
      *             if the route is not a main route
      */
     String getFrom() throws UnsupportedOperationException;
-
-    /**
-     * Get the route id
-     * 
-     * @return
-     */
-    String getId();
-
-    /**
-     * Set the route id
-     * 
-     * @param id
-     */
-    void setId(String id);
-
-    void appendRouteDefinition(ProcessorDefinition<?> pd, CamelContext camelContext);
-
-    void toLog(StringBuffer buffer, String prefix);
 
 }

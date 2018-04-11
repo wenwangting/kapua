@@ -19,6 +19,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAnyElement;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
+/**
+ * Route Container
+ */
 public class RouteContainer {
 
     private List<Route> route;

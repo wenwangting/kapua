@@ -32,19 +32,30 @@ import org.slf4j.LoggerFactory;
 @XmlRootElement(name = "choiceLeaf")
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlType(propOrder = {
+        "id",
         "condition",
         "choiceList",
         "otherwise"
 })
-public class ChoiceLeaf implements Choice {
+public class ChoiceLeaf implements Brick {
 
     private final static Logger logger = LoggerFactory.getLogger(ChoiceLeaf.class);
 
+    private String id;
     private String condition;
-    private List<Choice> choiceList;
-    private Route otherwise;
+    private List<Brick> choiceList;
+    private Brick otherwise;
 
     public ChoiceLeaf() {
+    }
+
+    @XmlAttribute
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     @XmlAttribute
@@ -58,29 +69,29 @@ public class ChoiceLeaf implements Choice {
 
     @XmlElementWrapper(name = "choiceList")
     @XmlAnyElement(lax = true)
-    public List<Choice> getChoiceList() {
+    public List<Brick> getChoiceList() {
         return choiceList;
     }
 
-    public void setChoiceList(List<Choice> choiceList) {
+    public void setChoiceList(List<Brick> choiceList) {
         this.choiceList = choiceList;
     }
 
     @XmlPath("otherwise")
     @XmlAnyElement(lax = true)
-    public Route getOtherwise() {
+    public Brick getOtherwise() {
         return otherwise;
     }
 
-    public void setOtherwise(Route otherwise) {
+    public void setOtherwise(Brick otherwise) {
         this.otherwise = otherwise;
     }
 
     @Override
-    public void appendRouteDefinition(ProcessorDefinition<?> pd, CamelContext camelContext) {
-        if (pd instanceof ChoiceDefinition) {
-            ProcessorDefinition<ChoiceDefinition> whenChoiceDefinition = ((ChoiceDefinition) pd).when().simple(condition);
-            for (Choice choice : choiceList) {
+    public void appendBrickDefinition(ProcessorDefinition<?> processorDefinition, CamelContext camelContext) throws UnsupportedOperationException {
+        if (processorDefinition instanceof ChoiceDefinition) {
+            ProcessorDefinition<ChoiceDefinition> whenChoiceDefinition = ((ChoiceDefinition) processorDefinition).when().simple(condition);
+            for (Brick choice : choiceList) {
                 if (choice instanceof Endpoint) {
                     try {
                         org.apache.camel.Endpoint ep = ((Endpoint) choice).asEndpoint(camelContext);
@@ -90,14 +101,14 @@ public class ChoiceLeaf implements Choice {
                         whenChoiceDefinition.to(((Endpoint) choice).asUriEndpoint(camelContext));
                     }
                 } else {
-                    choice.appendRouteDefinition(((ChoiceDefinition) pd), camelContext);
+                    choice.appendBrickDefinition(((ChoiceDefinition) processorDefinition), camelContext);
                 }
             }
-            ((ChoiceDefinition) pd).endChoice();
+            ((ChoiceDefinition) processorDefinition).endChoice();
             whenChoiceDefinition.end();
             if (otherwise != null) {
-                ((ChoiceDefinition) pd).otherwise();
-                otherwise.appendRouteDefinition(((ChoiceDefinition) pd), camelContext);
+                ((ChoiceDefinition) processorDefinition).otherwise();
+                otherwise.appendBrickDefinition(((ChoiceDefinition) processorDefinition), camelContext);
             }
         }
         else {
@@ -107,11 +118,13 @@ public class ChoiceLeaf implements Choice {
 
     public void toLog(StringBuffer buffer, String prefix) {
         buffer.append(prefix);
-        buffer.append("StepChoiceWhen - condition: ");
+        buffer.append("StepChoiceWhen - id");
+        buffer.append(id);
+        buffer.append(" condition: ");
         buffer.append(condition);
         buffer.append("\n");
         prefix += "\t";
-        for (Choice choice : choiceList) {
+        for (Brick choice : choiceList) {
             buffer.append(prefix);
             choice.toLog(buffer, prefix);
             buffer.append("\n");

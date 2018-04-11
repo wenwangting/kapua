@@ -28,7 +28,7 @@ import org.apache.camel.model.ProcessorDefinition;
         "beanName",
         "method"
 })
-public class EndpointBeanTo implements Route, Endpoint, Choice {
+public class EndpointBeanTo implements Endpoint {
 
     private String id;
     private String beanName;
@@ -62,8 +62,8 @@ public class EndpointBeanTo implements Route, Endpoint, Choice {
     }
 
     @Override
-    public void appendRouteDefinition(ProcessorDefinition<?> pd, CamelContext camelContext) {
-        pd.to(asBeanEndpoint(camelContext));
+    public void appendBrickDefinition(ProcessorDefinition<?> processorDefinition, CamelContext camelContext) throws UnsupportedOperationException {
+        processorDefinition.to(asBeanEndpoint(camelContext));
     }
 
     @Override
@@ -74,11 +74,6 @@ public class EndpointBeanTo implements Route, Endpoint, Choice {
     @Override
     public String asUriEndpoint(CamelContext camelContext) throws UnsupportedOperationException {
         return String.format("bean:%s?method=%s", beanName, method);
-    }
-
-    @Override
-    public String getFrom() {
-        throw new UnsupportedOperationException(String.format("Operation not allowed for the %s", this.getClass()));
     }
 
     private BeanEndpoint asBeanEndpoint(CamelContext camelContext) {

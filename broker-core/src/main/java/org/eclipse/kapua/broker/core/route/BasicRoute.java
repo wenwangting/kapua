@@ -24,10 +24,13 @@ import javax.xml.bind.annotation.XmlType;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.model.ChoiceDefinition;
+import org.apache.camel.model.MulticastDefinition;
 import org.apache.camel.model.PipelineDefinition;
+import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.RouteDefinition;
+import org.apache.commons.lang3.StringUtils;
 
-@XmlRootElement(name = "baseRoute")
+@XmlRootElement(name = "basicRoute")
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlType(propOrder = {
         "id",
@@ -37,16 +40,16 @@ import org.apache.camel.model.RouteDefinition;
         "routeList",
         "onExceptionList"
 })
-public class BaseRoute implements Route {
+public class BasicRoute implements Route {
 
     private String id;
     private boolean autoStartup;
     private String from;
-    private List<Route> routeList;
+    private List<Brick> routeList;
     private boolean multicast;
     private List<OnException> onExceptionList;
 
-    public BaseRoute() {
+    public BasicRoute() {
         routeList = new ArrayList<>();
     }
 
@@ -88,11 +91,11 @@ public class BaseRoute implements Route {
 
     @XmlAnyElement(lax = true)
     @XmlElementWrapper(name = "routeList")
-    public List<Route> getRouteList() {
+    public List<Brick> getRouteList() {
         return routeList;
     }
 
-    public void setRouteList(List<Route> routeList) {
+    public void setRouteList(List<Brick> routeList) {
         this.routeList = routeList;
     }
 
@@ -107,15 +110,35 @@ public class BaseRoute implements Route {
     }
 
     @Override
-    public void appendRouteDefinition(RouteDefinition routeDefinition, CamelContext camelContext) {
+    public void appendBrickDefinition(ProcessorDefinition<?> processorDefinition, CamelContext camelContext) throws UnsupportedOperationException {
+        if (processorDefinition instanceof RouteDefinition) {
+            appendBrickDefinitionInternal((RouteDefinition) processorDefinition, camelContext);
+        } else if (processorDefinition instanceof ChoiceDefinition) {
+            check();
+            appendBrickDefinitionInternal((ChoiceDefinition) processorDefinition, camelContext);
+        } else if (processorDefinition instanceof PipelineDefinition) {
+            check();
+            appendBrickDefinitionInternal((PipelineDefinition) processorDefinition, camelContext);
+        } else if (processorDefinition instanceof MulticastDefinition) {
+            check();
+            appendBrickDefinitionInternal((MulticastDefinition) processorDefinition, camelContext);
+        } else {
+            throw new UnsupportedOperationException(
+                    String.format("Unsupported ProcessDefinition [%s]... Only ChoiceDefinition, PipelineDefinition, PipelineDefinition and RouteDefinition are allowed", this.getClass()));
+        }
+    }
+
+    private void appendBrickDefinitionInternal(RouteDefinition routeDefinition, CamelContext camelContext) {
         routeDefinition.setId(id);
         routeDefinition.setAutoStartup(Boolean.toString(autoStartup));
         if (multicast) {
-            routeDefinition.multicast();
+            MulticastDefinition md = routeDefinition.multicast();
+            appendBrickDefinitionInternal(md, camelContext);
+            md.end();
         }
-        for (Route route : routeList) {
+        else {
             PipelineDefinition pd = routeDefinition.pipeline();
-            route.appendRouteDefinition(routeDefinition, camelContext);
+            appendBrickDefinitionInternal(pd, camelContext);
             pd.end();
         }
         for (OnException onException : onExceptionList) {
@@ -123,13 +146,36 @@ public class BaseRoute implements Route {
         }
     }
 
-    @Override
-    public void appendRouteDefinition(ChoiceDefinition choiceDefinition, CamelContext camelContext) {
-        if (onExceptionList != null && onExceptionList.size() > 0) {
-            throw new UnsupportedOperationException(String.format("Operation not allowed for the %s. The subroute cannot have from and/or exception handling set", this.getClass()));
+
+    private void appendBrickDefinitionInternal(PipelineDefinition pipelineDefinition, CamelContext camelContext) {
+        for (Brick route : routeList) {
+            route.appendBrickDefinition(pipelineDefinition, camelContext);
         }
-        for (Route route : routeList) {
-            route.appendRouteDefinition(choiceDefinition, camelContext);
+    }
+
+    private void appendBrickDefinitionInternal(MulticastDefinition multicastDefinition, CamelContext camelContext) {
+        for (Brick route : routeList) {
+            PipelineDefinition pd = multicastDefinition.pipeline();
+            route.appendBrickDefinition(pd, camelContext);
+            pd.end();
+        }
+    }
+
+    private void appendBrickDefinitionInternal(ChoiceDefinition choiceDefinition, CamelContext camelContext) {
+        if (multicast) {
+            MulticastDefinition md = choiceDefinition.multicast();
+            appendBrickDefinitionInternal(md, camelContext);
+            md.end();
+        } else {
+            PipelineDefinition pd = choiceDefinition.pipeline();
+            appendBrickDefinitionInternal(pd, camelContext);
+            pd.end();
+        }
+    }
+
+    private void check() {
+        if (!StringUtils.isEmpty(from) || onExceptionList != null && onExceptionList.size() > 0) {
+            throw new UnsupportedOperationException(String.format("Operation not allowed for the %s. The subroute cannot have from and/or exception handling set", this.getClass()));
         }
     }
 
@@ -146,7 +192,7 @@ public class BaseRoute implements Route {
         buffer.append(autoStartup);
         buffer.append("\n");
         prefix += "\t";
-        for (Route route : routeList) {
+        for (Brick route : routeList) {
             buffer.append(prefix);
             route.toLog(buffer, prefix);
             buffer.append("\n");

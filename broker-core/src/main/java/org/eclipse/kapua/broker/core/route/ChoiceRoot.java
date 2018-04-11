@@ -36,11 +36,11 @@ import org.eclipse.persistence.oxm.annotations.XmlPath;
         "choiceList",
         "otherwise"
 })
-public class ChoiceRoot implements Route {
+public class ChoiceRoot implements Brick {
 
     private String id;
-    private List<Choice> choiceList;
-    private Route otherwise;
+    private List<Brick> choiceList;
+    private Brick otherwise;
 
     public ChoiceRoot() {
         choiceList = new ArrayList<>();
@@ -57,33 +57,33 @@ public class ChoiceRoot implements Route {
 
     @XmlElementWrapper(name = "choiceList")
     @XmlAnyElement(lax = true)
-    public List<Choice> getChoiceList() {
+    public List<Brick> getChoiceList() {
         return choiceList;
     }
 
-    public void setChoiceList(List<Choice> choiceList) {
+    public void setChoiceList(List<Brick> choiceList) {
         this.choiceList = choiceList;
     }
 
     @XmlPath("otherwise")
     @XmlAnyElement(lax = true)
-    public Route getOtherwise() {
+    public Brick getOtherwise() {
         return otherwise;
     }
 
-    public void setOtherwise(Route otherwise) {
+    public void setOtherwise(Brick otherwise) {
         this.otherwise = otherwise;
     }
 
     @Override
-    public void appendRouteDefinition(ProcessorDefinition<?> pd, CamelContext camelContext) {
+    public void appendBrickDefinition(ProcessorDefinition<?> processorDefinition, CamelContext camelContext) throws UnsupportedOperationException {
         ChoiceDefinition cd = null;
-        if (pd instanceof RouteDefinition) {
-            cd = ((RouteDefinition) pd).choice();
-        } else if (pd instanceof ChoiceDefinition) {
-            cd = ((ChoiceDefinition) pd);
-        } else if (pd instanceof PipelineDefinition) {
-            cd = ((PipelineDefinition) pd).choice();
+        if (processorDefinition instanceof RouteDefinition) {
+            cd = ((RouteDefinition) processorDefinition).choice();
+        } else if (processorDefinition instanceof ChoiceDefinition) {
+            cd = ((ChoiceDefinition) processorDefinition);
+        } else if (processorDefinition instanceof PipelineDefinition) {
+            cd = ((PipelineDefinition) processorDefinition).choice();
         }
         else {
             throw new UnsupportedOperationException(String.format("Unsupported ProcessDefinition [%s]... Only ChoiceDefinition, PipelineDefinition and RouteDefinition are allowed", this.getClass()));
@@ -92,20 +92,15 @@ public class ChoiceRoot implements Route {
     }
 
     private void appendRouteDefinitionInternal(ChoiceDefinition cd, CamelContext camelContext) {
-        for (Choice choiceWhen : choiceList) {
-            choiceWhen.appendRouteDefinition(cd, camelContext);
+        for (Brick choiceWhen : choiceList) {
+            choiceWhen.appendBrickDefinition(cd, camelContext);
         }
         cd.endChoice();
         if (otherwise != null) {
             cd.otherwise();
-            otherwise.appendRouteDefinition(cd, camelContext);
+            otherwise.appendBrickDefinition(cd, camelContext);
         }
         cd.end();
-    }
-
-    @Override
-    public String getFrom() {
-        throw new UnsupportedOperationException(String.format("Operation not allowed for the %s", this.getClass()));
     }
 
     @Override
@@ -115,7 +110,7 @@ public class ChoiceRoot implements Route {
         buffer.append(id);
         buffer.append("\n");
         prefix += "\t";
-        for (Choice choiceWhen : choiceList) {
+        for (Brick choiceWhen : choiceList) {
             buffer.append(prefix);
             choiceWhen.toLog(buffer, prefix);
             buffer.append("\n");

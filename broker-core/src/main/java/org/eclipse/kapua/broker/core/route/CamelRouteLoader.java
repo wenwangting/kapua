@@ -68,7 +68,7 @@ public class CamelRouteLoader extends RouteBuilder {
             try {
                 if (getContext().getRoute(route.getId()) == null) {
                     RouteDefinition rd = from(route.getFrom());
-                    route.appendRouteDefinition(rd, getContext());// routeCollection.getRoutes().add(rd);
+                    route.appendBrickDefinition(rd, getContext());// routeCollection.getRoutes().add(rd);
                     logger.info("Configuring Camel Routes Loader {}", rd);
                     logger.info("Configuring Camel Routes Loader... Initializing route {}... DONE", route.getId());
                 } else {

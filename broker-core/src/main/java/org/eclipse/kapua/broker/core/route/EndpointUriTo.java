@@ -26,7 +26,7 @@ import org.apache.camel.model.ProcessorDefinition;
         "id",
         "uri"
 })
-public class EndpointUriTo implements Route, Endpoint, Choice {
+public class EndpointUriTo implements Endpoint {
 
     private String id;
     private String uri;
@@ -50,17 +50,12 @@ public class EndpointUriTo implements Route, Endpoint, Choice {
     }
 
     @Override
-    public void appendRouteDefinition(ProcessorDefinition<?> pd, CamelContext camelContext) {
-        pd.to(uri);
+    public void appendBrickDefinition(ProcessorDefinition<?> processorDefinition, CamelContext camelContext) throws UnsupportedOperationException {
+        processorDefinition.to(uri);
     }
 
     @Override
     public org.apache.camel.Endpoint asEndpoint(CamelContext camelContext) {
-        throw new UnsupportedOperationException(String.format("Operation not allowed for the %s", this.getClass()));
-    }
-
-    @Override
-    public String getFrom() {
         throw new UnsupportedOperationException(String.format("Operation not allowed for the %s", this.getClass()));
     }
 

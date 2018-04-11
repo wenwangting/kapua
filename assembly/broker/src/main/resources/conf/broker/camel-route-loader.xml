@@ -15,7 +15,7 @@
  For the available managed placeholders see the CAMEL_ROUTER_PLACEHOLDER enum.
   -->
 <routeContainer>
-    <baseRoute id="main_kapua_route" autoStartup="true" multicast="false" 
+    <basicRoute id="main_kapua_route" autoStartup="true" multicast="false" 
         errorHandlerRef="mainRouteMessageErrorHandler"
         from="activemq:queue:Consumer.eurotech:mainRoutelisteners:EXACTLY_ONCE.VirtualTopic.>?asyncConsumer=false&amp;acknowledgementModeName=CLIENT_ACKNOWLEDGE&amp;transacted=false&amp;concurrentConsumers=20&amp;maxConcurrentConsumers=50" >
         <routeList>
@@ -56,29 +56,25 @@
                               </choiceLeaf>
                          </choiceList>
                      </choiceLeaf>
-                     <!-- 
-                     <otherwise>
-                     </otherwise>
-                      -->
                 </choiceList>
-                    <otherwise>
-                        <baseRoute id="otherwise_route" multicast="true">
-                            <routeList>
-                                <baseRoute id="es_data_store">
-                                    <routeList>
-                                        <endpointBeanTo id="tel_es_converter" beanName="kapuaDataConverter" method="convertToData" />
-                                        <endpointBeanTo id="tel_es_processor" beanName="dataStorageMessageProcessor" method="processMessage" />
-                                    </routeList>
-                                </baseRoute>
-                                <baseRoute id="kafka_forwarding">
-                                    <routeList>
-                                        <endpointBeanTo id="tel_kafka_converter" beanName="kapuaDataConverter" method="convertToData" />
-                                        <endpointBeanTo id="tel_kafka_processor" beanName="dataStorageMessageProcessor" method="processMessage" />
-                                    </routeList>
-                                </baseRoute>
-                            </routeList>
-                        </baseRoute>
-                    </otherwise>
+                <otherwise>
+                    <basicRoute id="otherwise_route" multicast="true">
+                        <routeList>
+                            <basicRoute id="es_data_store">
+                                <routeList>
+                                    <endpointBeanTo id="tel_es_converter" beanName="kapuaDataConverter" method="convertToData" />
+                                    <endpointBeanTo id="tel_es_processor" beanName="dataStorageMessageProcessor" method="processMessage" />
+                                </routeList>
+                            </basicRoute>
+                            <basicRoute id="es_data_store_2">
+                                <routeList>
+                                    <endpointBeanTo id="tel_kafka_converter_2" beanName="kapuaDataConverter" method="convertToData" />
+                                    <endpointBeanTo id="tel_kafka_processor_2" beanName="dataStorageMessageProcessor" method="processMessage" />
+                                </routeList>
+                            </basicRoute>
+                        </routeList>
+                    </basicRoute>
+                </otherwise>
             </choiceRoot>
             <endpointBeanTo id="session_unbinding" beanName="kapuaCamelFilter" method="unbindSession"/>
         </routeList>
@@ -112,5 +108,5 @@
                 </endpointList>
             </onException>
         </onExceptionList>
-    </baseRoute>
+    </basicRoute>
 </routeContainer>
