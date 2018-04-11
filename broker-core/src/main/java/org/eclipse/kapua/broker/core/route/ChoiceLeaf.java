@@ -37,13 +37,29 @@ import org.slf4j.LoggerFactory;
         "choiceList",
         "otherwise"
 })
+/**
+ * Choice leaf brick implementation
+ *
+ */
 public class ChoiceLeaf implements Brick {
 
     private final static Logger logger = LoggerFactory.getLogger(ChoiceLeaf.class);
 
+    /**
+     * Id
+     */
     private String id;
+    /**
+     * Condition to check
+     */
     private String condition;
+    /**
+     * Steps list (to follow if the condition is satisfied)
+     */
     private List<Brick> choiceList;
+    /**
+     * Otherwise step (if the condition is not satisfied)
+     */
     private Brick otherwise;
 
     public ChoiceLeaf() {

@@ -36,10 +36,24 @@ import org.eclipse.persistence.oxm.annotations.XmlPath;
         "choiceList",
         "otherwise"
 })
+/**
+ * Choice brick root object.</br>
+ * It's the container for the when/otherwise conditions
+ *
+ */
 public class ChoiceRoot implements Brick {
 
+    /**
+     * Id
+     */
     private String id;
+    /**
+     * Choice list (when conditions)
+     */
     private List<Brick> choiceList;
+    /**
+     * Otherwise condition (fired if none of the previous step is fired)
+     */
     private Brick otherwise;
 
     public ChoiceRoot() {

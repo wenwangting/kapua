@@ -28,10 +28,23 @@ import org.apache.camel.model.ProcessorDefinition;
         "beanName",
         "method"
 })
+/**
+ * Endpoint bean implementation
+ *
+ */
 public class EndpointBeanTo implements Endpoint {
 
+    /**
+     * Id (it's the step Id not the spring bean id)
+     */
     private String id;
+    /**
+     * Bean name
+     */
     private String beanName;
+    /**
+     * Method to invoke
+     */
     private String method;
 
     @XmlAttribute

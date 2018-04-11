@@ -13,10 +13,28 @@ package org.eclipse.kapua.broker.core.route;
 
 import org.apache.camel.CamelContext;
 
+/**
+ * Brick Endpoint definition
+ *
+ */
 public interface Endpoint extends Brick {
 
+    /**
+     * Return the brick as Camel endpoint
+     * 
+     * @param camelContext
+     * @return
+     * @throws UnsupportedOperationException
+     */
     org.apache.camel.Endpoint asEndpoint(CamelContext camelContext) throws UnsupportedOperationException;
 
+    /**
+     * Return the brick as uri endpoint
+     * 
+     * @param camelContext
+     * @return
+     * @throws UnsupportedOperationException
+     */
     String asUriEndpoint(CamelContext camelContext) throws UnsupportedOperationException;
 
 }

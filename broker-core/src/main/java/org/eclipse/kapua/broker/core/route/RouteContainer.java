@@ -24,6 +24,9 @@ import javax.xml.bind.annotation.XmlAnyElement;
  */
 public class RouteContainer {
 
+    /**
+     * Route list
+     */
     private List<Route> route;
 
     public RouteContainer() {

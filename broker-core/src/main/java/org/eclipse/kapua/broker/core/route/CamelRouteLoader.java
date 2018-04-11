@@ -35,6 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+/**
+ * Custom routes loader implementation. It loads the routes configuration from the configuration file, creates and insert them into the Camel context.
+ *
+ */
 public class CamelRouteLoader extends RouteBuilder {
 
     private final static Logger logger = LoggerFactory.getLogger(CamelDefaultRouter.class);
@@ -47,7 +51,6 @@ public class CamelRouteLoader extends RouteBuilder {
     }
 
     public CamelRouteLoader() throws Exception {
-
     }
 
     @Override

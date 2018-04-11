@@ -44,6 +44,12 @@ public interface Brick {
      */
     void appendBrickDefinition(ProcessorDefinition<?> processorDefinition, CamelContext camelContext) throws UnsupportedOperationException;
 
+    /**
+     * Append the brick to the buffer in a human readable fashion
+     * 
+     * @param buffer
+     * @param prefix
+     */
     void toLog(StringBuffer buffer, String prefix);
 
 }

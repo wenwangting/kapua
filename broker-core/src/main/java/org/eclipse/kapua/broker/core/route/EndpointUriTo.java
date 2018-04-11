@@ -26,9 +26,19 @@ import org.apache.camel.model.ProcessorDefinition;
         "id",
         "uri"
 })
+/**
+ * Endpoint uri implementation
+ *
+ */
 public class EndpointUriTo implements Endpoint {
 
+    /**
+     * Id
+     */
     private String id;
+    /**
+     * Uri to invoke
+     */
     private String uri;
 
     @XmlAttribute

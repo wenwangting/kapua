@@ -40,13 +40,35 @@ import org.apache.commons.lang3.StringUtils;
         "routeList",
         "onExceptionList"
 })
+/**
+ * Basic route implementation
+ *
+ */
 public class BasicRoute implements Route {
 
+    /**
+     * Id
+     */
     private String id;
+    /**
+     * Autostartup
+     */
     private boolean autoStartup;
+    /**
+     * From (uri)
+     */
     private String from;
+    /**
+     * List of brick that compose the route
+     */
     private List<Brick> routeList;
+    /**
+     * Multicast the bricks (so every brick will be executed in parallel)
+     */
     private boolean multicast;
+    /**
+     * Exception handling list
+     */
     private List<OnException> onExceptionList;
 
     public BasicRoute() {
