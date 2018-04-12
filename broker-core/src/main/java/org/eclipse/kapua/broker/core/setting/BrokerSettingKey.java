@@ -12,6 +12,7 @@
 package org.eclipse.kapua.broker.core.setting;
 
 import org.eclipse.kapua.broker.core.plugin.ConnectorDescriptor;
+import org.eclipse.kapua.broker.core.route.CamelRouteLoader;
 import org.eclipse.kapua.broker.core.router.CamelDefaultRouter;
 import org.eclipse.kapua.commons.setting.SettingKey;
 

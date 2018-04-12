@@ -95,7 +95,7 @@ public class ChoiceRoot implements Brick {
         if (processorDefinition instanceof RouteDefinition) {
             cd = ((RouteDefinition) processorDefinition).choice();
         } else if (processorDefinition instanceof ChoiceDefinition) {
-            cd = ((ChoiceDefinition) processorDefinition);
+            cd = ((ChoiceDefinition) processorDefinition).choice();
         } else if (processorDefinition instanceof PipelineDefinition) {
             cd = ((PipelineDefinition) processorDefinition).choice();
         }

@@ -22,56 +22,50 @@
             <endpointBeanTo id="session_binding" beanName="kapuaCamelFilter" method="bindSession"/>
             <choiceRoot id="main_choice">
                 <choiceList>
-                     <choiceLeaf id="lifecycle_choice" condition="${header.JMSDestination} regex '${CLASSIFIER}.*'">
+                     <choiceLeaf id="lifecycle_choice" condition="${ORIGINAL_DESTINATION} regex '^${CLASSIFIER}.*'">
                          <choiceList>
-                              <choiceLeaf id="birth_choice" condition="${header.JMSDestination} regex '${CLASSIFIER}(.*\.){2}MQTT\.BIRTH'">
-                                  <choiceList>
-                                      <endpointBeanTo id="lc_converter" beanName="kapuaLifeCycleConverter" method="convertToBirth" />
-                                      <endpointBeanTo id="lc_processor" beanName="deviceMessageListener" method="processBirthMessage" />
-                                  </choiceList>
-                              </choiceLeaf>
-                              <choiceLeaf id="dc_choice" condition="${header.JMSDestination} regex '${CLASSIFIER}(.*\.){2}MQTT\.DC'">
-                                  <choiceList>
-                                      <endpointBeanTo id="lc_converter" beanName="kapuaLifeCycleConverter" method="convertToDisconnect" />
-                                      <endpointBeanTo id="lc_processor" beanName="deviceMessageListener" method="processDisconnectMessage" />
-                                  </choiceList>
-                              </choiceLeaf>
-                              <choiceLeaf id="apps_choice" condition="${header.JMSDestination} regex '${CLASSIFIER}(.*\.){2}MQTT\.APPS'">
-                                  <choiceList>
-                                      <endpointBeanTo id="lc_converter" beanName="kapuaLifeCycleConverter" method="convertToApps" />
-                                      <endpointBeanTo id="lc_processor" beanName="deviceMessageListener" method="processAppsMessage" />
-                                  </choiceList>
-                              </choiceLeaf>
-                              <choiceLeaf id="lwt_choice" condition="${header.JMSDestination} regex '${CLASSIFIER}(.*\.){2}MQTT\.LWT'">
-                                  <choiceList>
-                                      <endpointBeanTo id="lc_converter" beanName="kapuaLifeCycleConverter" method="convertToMissing" />
-                                      <endpointBeanTo id="lc_processor" beanName="deviceMessageListener" method="processMissingMessage" />
-                                  </choiceList>
-                              </choiceLeaf>
-                              <choiceLeaf id="notify_choice" condition="${header.JMSDestination} regex '${CLASSIFIER}(.*\.){2}MQTT\.NOTIFY'">
-                                  <choiceList>
-                                      <endpointBeanTo id="lc_converter" beanName="kapuaLifeCycleConverter" method="convertToNotify" />
-                                      <endpointBeanTo id="lc_processor" beanName="deviceMessageListener" method="processNotifyMessage" />
-                                  </choiceList>
-                              </choiceLeaf>
+                             <choiceRoot id="lifecycle_subchoice">
+                                 <choiceList>
+                                      <choiceLeaf id="birth_choice" condition="${ORIGINAL_DESTINATION} regex '^${CLASSIFIER}(.*\.){2}MQTT\.BIRTH'">
+                                          <choiceList>
+                                              <endpointBeanTo id="lc_conv_birth" beanName="kapuaLifeCycleConverter" method="convertToBirth" />
+                                              <endpointBeanTo id="lc_proc_birth" beanName="deviceMessageListener" method="processBirthMessage" />
+                                          </choiceList>
+                                      </choiceLeaf>
+                                      <choiceLeaf id="dc_choice" condition="${ORIGINAL_DESTINATION} regex '^${CLASSIFIER}(.*\.){2}MQTT\.DC'">
+                                          <choiceList>
+                                              <endpointBeanTo id="lc_conv_dc" beanName="kapuaLifeCycleConverter" method="convertToDisconnect" />
+                                              <endpointBeanTo id="lc_proc_dc" beanName="deviceMessageListener" method="processDisconnectMessage" />
+                                          </choiceList>
+                                      </choiceLeaf>
+                                      <choiceLeaf id="apps_choice" condition="${ORIGINAL_DESTINATION} regex '^${CLASSIFIER}(.*\.){2}MQTT\.APPS'">
+                                          <choiceList>
+                                              <endpointBeanTo id="lc_conv_apps" beanName="kapuaLifeCycleConverter" method="convertToApps" />
+                                              <endpointBeanTo id="lc_proc_apps" beanName="deviceMessageListener" method="processAppsMessage" />
+                                          </choiceList>
+                                      </choiceLeaf>
+                                      <choiceLeaf id="lwt_choice" condition="${ORIGINAL_DESTINATION} regex '^${CLASSIFIER}(.*\.){2}MQTT\.LWT'">
+                                          <choiceList>
+                                              <endpointBeanTo id="lc_conv_lwt" beanName="kapuaLifeCycleConverter" method="convertToMissing" />
+                                              <endpointBeanTo id="lc_proc_lwt" beanName="deviceMessageListener" method="processMissingMessage" />
+                                          </choiceList>
+                                      </choiceLeaf>
+                                      <choiceLeaf id="notify_choice" condition="${ORIGINAL_DESTINATION} regex '^${CLASSIFIER}(.*\.){2}MQTT\.NOTIFY'">
+                                          <choiceList>
+                                              <endpointBeanTo id="lc_conv_notify" beanName="kapuaLifeCycleConverter" method="convertToNotify" />
+                                              <endpointBeanTo id="lc_proc_notify" beanName="deviceMessageListener" method="processNotifyMessage" />
+                                          </choiceList>
+                                      </choiceLeaf>
+                                 </choiceList>
+                             </choiceRoot>
                          </choiceList>
                      </choiceLeaf>
                 </choiceList>
                 <otherwise>
-                    <basicRoute id="otherwise_route" multicast="true">
+                    <basicRoute id="es_data_store">
                         <routeList>
-                            <basicRoute id="es_data_store">
-                                <routeList>
-                                    <endpointBeanTo id="tel_es_converter" beanName="kapuaDataConverter" method="convertToData" />
-                                    <endpointBeanTo id="tel_es_processor" beanName="dataStorageMessageProcessor" method="processMessage" />
-                                </routeList>
-                            </basicRoute>
-                            <basicRoute id="es_data_store_2">
-                                <routeList>
-                                    <endpointBeanTo id="tel_kafka_converter_2" beanName="kapuaDataConverter" method="convertToData" />
-                                    <endpointBeanTo id="tel_kafka_processor_2" beanName="dataStorageMessageProcessor" method="processMessage" />
-                                </routeList>
-                            </basicRoute>
+                            <endpointBeanTo id="tel_es_conv" beanName="kapuaDataConverter" method="convertToData" />
+                            <endpointBeanTo id="tel_es_proc" beanName="dataStorageMessageProcessor" method="processMessage" />
                         </routeList>
                     </basicRoute>
                 </otherwise>
