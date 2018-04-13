@@ -12,6 +12,7 @@
 package org.eclipse.kapua.broker.core.route;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -24,6 +25,7 @@ import javax.xml.bind.annotation.XmlType;
 import org.apache.camel.CamelContext;
 import org.apache.camel.model.ChoiceDefinition;
 import org.apache.camel.model.ProcessorDefinition;
+import org.eclipse.kapua.KapuaException;
 import org.eclipse.kapua.broker.core.router.PlaceholderReplacer;
 import org.eclipse.persistence.oxm.annotations.XmlPath;
 import org.slf4j.Logger;
@@ -104,9 +106,10 @@ public class ChoiceLeaf implements Brick {
     }
 
     @Override
-    public void appendBrickDefinition(ProcessorDefinition<?> processorDefinition, CamelContext camelContext) throws UnsupportedOperationException {
+    public void appendBrickDefinition(ProcessorDefinition<?> processorDefinition, CamelContext camelContext, Map<String, Object> ac) throws UnsupportedOperationException, KapuaException {
         if (processorDefinition instanceof ChoiceDefinition) {
-            ProcessorDefinition<ChoiceDefinition> whenChoiceDefinition = ((ChoiceDefinition) processorDefinition).when().simple(condition);
+            ProcessorDefinition<ChoiceDefinition> whenChoiceDefinition = ((ChoiceDefinition) processorDefinition).when().simple(
+                    PlaceholderReplacer.replacePlaceholder(condition, ac));
             for (Brick choice : choiceList) {
                 if (choice instanceof Endpoint) {
                     try {
@@ -117,14 +120,14 @@ public class ChoiceLeaf implements Brick {
                         whenChoiceDefinition.to(((Endpoint) choice).asUriEndpoint(camelContext));
                     }
                 } else {
-                    choice.appendBrickDefinition(((ChoiceDefinition) processorDefinition), camelContext);
+                    choice.appendBrickDefinition(((ChoiceDefinition) processorDefinition), camelContext, ac);
                 }
             }
             ((ChoiceDefinition) processorDefinition).endChoice();
             whenChoiceDefinition.end();
             if (otherwise != null) {
                 ((ChoiceDefinition) processorDefinition).otherwise();
-                otherwise.appendBrickDefinition(((ChoiceDefinition) processorDefinition), camelContext);
+                otherwise.appendBrickDefinition(((ChoiceDefinition) processorDefinition), camelContext, ac);
             }
         }
         else {
